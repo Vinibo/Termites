@@ -1,0 +1,5 @@
+termites:0.0.319
+0,Localhost,127.0.0.1,22,vinibo
+0:0,test2,127.0.0.1,22,vinibo
+1,Mac Mini,192.168.1.175,22,vinibo
+2,sub-folder,,,
