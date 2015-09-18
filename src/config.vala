@@ -32,9 +32,11 @@ namespace Termites {
   [GtkTemplate (ui = "/termites/ui/config.ui")]
   public class Config : Dialog {
 
-      const string DEFAULT_SETTINGS_PATH = "~/.config/Termites/";
+      const string DEFAULT_SETTINGS_PATH = "file://%s/.config/Termites/%s";
+      const string DEFAULT_SETTINGS_FILE = "default.conf";
 
-      private string last_tree_file_path {get; set;}
+      public string last_tree_file_path {get; set;}
+      private FileHelper configuration_file;
 
       [GtkChild]
       private Switch automatic_save;
@@ -52,30 +54,26 @@ namespace Termites {
       private SpinButton save_interval;
 
       public Config () {
-          load_settings ();
+          configuration_file = new FileHelper (DEFAULT_SETTINGS_PATH.printf (Environment.get_home_dir (), DEFAULT_SETTINGS_FILE));
 
           // Apply settings to form
-      }
-
-      public void load_settings () {
-
-          // Should not contains file logic.
-          File file = File.new_for_path (DEFAULT_SETTINGS_PATH + "default.conf");
-
-          if (file.query_exists ()) {
-              DataInputStream dis = new DataInputStream (file.read ());
-
-              if (FileHelper.is_acceptable_file (dis)) {
-                  stdout.printf("File is loaded\n");
-              }
-          } else {
-              // We must create the directory and file
-
-          }
+          automatic_save.set_state (bool.parse (configuration_file.get_value ("automatic_save")));
+          last_tree_file_path = configuration_file.get_value ("last_tree_file_path");
+          stdout.printf ("Save file position : %s\n", last_tree_file_path);
       }
 
       public void save_settings () {
+          configuration_file.save_file ();
+      }
 
+      [GtkCallback]
+      private void save_and_close () {
+          save_file ();
+      }
+
+      [GtkCallback]
+      private void cancel_modifications () {
+          this.close ();
       }
   }
 }

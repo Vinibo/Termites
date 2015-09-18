@@ -31,13 +31,13 @@ namespace Termites {
     public class TermiteStore : Object {
 
         private TreeStore termiteNodes;
+        private FileHelper file;
 
         public TermiteStore () {
             termiteNodes = new TreeStore (2, typeof(string), typeof(TermiteNode));
         }
 
         public void add_node (TermiteNode node, TreeIter? position, out TreeIter position_inserted) {
-
             TreeIter new_position_in_tree;
             termiteNodes.append (out new_position_in_tree, position);
             termiteNodes.set (new_position_in_tree, 0, node.name, 1, node, -1);
@@ -56,10 +56,6 @@ namespace Termites {
 
             // Might use swap to avoid removing child nodes
 
-        }
-
-        public void clear_tree () {
-          termiteNodes.clear ();
         }
 
         public TreeStore get_tree () {
@@ -91,6 +87,26 @@ namespace Termites {
 
                 return false;
             };
+        }
+
+        public void load_termites_tree_from_file (string file_path) {
+            file = new FileHelper (file_path);
+            termiteNodes.clear ();
+
+            foreach (string key in file.linear_file_content) {
+                string[] node_line = key.split (",");
+
+                // Creation of node from array of string
+                TermiteNode node = new TermiteNode.empty ();
+                node.name = node_line[1];
+                node.host = node_line[2];
+                node.port = node_line[3];
+                node.username = node_line[4];
+
+                TreeIter wasteland;
+                TreeIter? new_position = convert_string_to_new_iter (node_line[0]);
+                add_node (node, new_position, out wasteland);
+            }
         }
     }
 }

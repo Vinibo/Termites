@@ -46,7 +46,6 @@ namespace Termites {
 		private Label lblSession;
 
 		private TermiteStore termite_tree_store;
-
 		private Config m_configuration;
 
 		static int main (string[] args) {
@@ -63,6 +62,7 @@ namespace Termites {
 			m_configuration = new Config ();
 
 			termite_tree_store = new TermiteStore ();
+			termite_tree_store.load_termites_tree_from_file (m_configuration.last_tree_file_path);
 			terminalTreeview.set_model(termite_tree_store.get_tree ());
 
 			CellRendererText cell = new CellRendererText ();
@@ -93,7 +93,12 @@ namespace Termites {
 			chooser.show ();
 			if (chooser.run () == ResponseType.ACCEPT) {
 				string uri = chooser.get_uri ();
-				FileHelper.load_termites_tree (uri, termite_tree_store);
+				stdout.printf ("URI: %s\n", uri);
+				termite_tree_store.load_termites_tree_from_file (uri);
+
+				// Update last opened
+				m_configuration.last_tree_file_path = uri;
+				m_configuration.save_settings ();
 				chooser.close ();
 			} else {
 				chooser.close ();
@@ -247,6 +252,7 @@ namespace Termites {
 		public void open_settings () {
 			m_configuration.set_transient_for (this);
 			m_configuration.show_all ();
+			//m_configuration.run (); // This seems to block parent UI (grayed-out)
 		}
 
 		private static TermiteNode get_selection (TreeModel p_model, TreeIter p_iter) {

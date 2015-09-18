@@ -23,7 +23,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="termites_settings_cancel_and_close" swapped="no"/>
+                <signal name="clicked" handler="cancel_modifications" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -40,7 +40,7 @@
                 <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="termites_settings_save_and_close" swapped="no"/>
+                <signal name="clicked" handler="save_and_close" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -64,7 +64,7 @@
               <object class="GtkLabel" id="label2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">label</property>
+                <property name="label" translatable="yes">Not yet implemented</property>
               </object>
             </child>
             <child type="tab">
@@ -255,7 +255,7 @@
               <object class="GtkLabel" id="label3">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">label</property>
+                <property name="label" translatable="yes">Not yet implemented</property>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -265,7 +265,7 @@
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">label</property>
+                <property name="label" translatable="yes">Fonts</property>
               </object>
               <packing>
                 <property name="position">2</property>
