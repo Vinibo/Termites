@@ -35,7 +35,7 @@ namespace Termites {
       const string DEFAULT_SETTINGS_PATH = "file://%s/.config/Termites/%s";
       const string DEFAULT_SETTINGS_FILE = "default.conf";
 
-      public string last_tree_file_path {get; set;}
+      private string last_tree_file_path;
       private FileHelper configuration_file;
 
       [GtkChild]
@@ -43,6 +43,9 @@ namespace Termites {
 
       [GtkChild]
       private Frame automatic_saving_frame;
+
+      [GtkChild]
+      private Switch save_on_close;
 
       [GtkChild]
       private RadioButton save_on_modification;
@@ -55,25 +58,47 @@ namespace Termites {
 
       public Config () {
           configuration_file = new FileHelper (DEFAULT_SETTINGS_PATH.printf (Environment.get_home_dir (), DEFAULT_SETTINGS_FILE));
-
-          // Apply settings to form
-          automatic_save.set_state (bool.parse (configuration_file.get_value ("automatic_save")));
-          last_tree_file_path = configuration_file.get_value ("last_tree_file_path");
-          stdout.printf ("Save file position : %s\n", last_tree_file_path);
+          load_settings_status ();
       }
 
-      public void save_settings () {
-          configuration_file.save_file ();
+      public string get_last_tree_file_path () {
+          return last_tree_file_path;
+      }
+
+      public bool is_save_on_close () {
+          return save_on_close.active;
+      }
+
+      public void set_last_tree_file_path (string new_value) {
+          last_tree_file_path = new_value;
+          configuration_file.update_value ("last_tree_file_path", last_tree_file_path);
+          configuration_file.save ();
+      }
+
+      private void load_settings_status () {
+          automatic_save.set_state (bool.parse (configuration_file.get_value ("automatic_save")));
+          last_tree_file_path = configuration_file.get_value ("last_tree_file_path");
+          save_interval.set_value (int.parse (configuration_file.get_value ("save_interval")));
+          save_on_close.set_state (bool.parse (configuration_file.get_value ("save_on_close")));
       }
 
       [GtkCallback]
       private void save_and_close () {
-          save_file ();
+          apply_modifications ();
+          configuration_file.save ();
+          this.close ();
       }
 
       [GtkCallback]
       private void cancel_modifications () {
           this.close ();
+      }
+
+      private void apply_modifications () {
+          configuration_file.update_value ("automatic_save", automatic_save.active.to_string ());
+          configuration_file.update_value ("save_interval", save_interval.get_value().to_string ());
+          configuration_file.update_value ("save_on_close", save_on_close.active.to_string ());
+          configuration_file.update_value ("last_tree_file_path", last_tree_file_path);
       }
   }
 }

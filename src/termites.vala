@@ -62,22 +62,20 @@ namespace Termites {
 			m_configuration = new Config ();
 
 			termite_tree_store = new TermiteStore ();
-			termite_tree_store.load_termites_tree_from_file (m_configuration.last_tree_file_path);
+			termite_tree_store.load_termites_tree_from_file (m_configuration.get_last_tree_file_path ());
 			terminalTreeview.set_model(termite_tree_store.get_tree ());
 
 			CellRendererText cell = new CellRendererText ();
 			terminalTreeview.insert_column_with_attributes (-1, "Name", cell, "text", 0,null);
 		}
 
-	 	[GtkCallback]
-		public void on_destroy (Widget window)
-		{
-			Gtk.main_quit();
-		}
-
 		[GtkCallback]
 		public void quit_termites (Widget window)
 		{
+			//Verify if save_on_close setting is active
+			if (m_configuration.is_save_on_close ()) {
+				save_tree ();
+			}
 			Gtk.main_quit();
 		}
 
@@ -97,8 +95,7 @@ namespace Termites {
 				termite_tree_store.load_termites_tree_from_file (uri);
 
 				// Update last opened
-				m_configuration.last_tree_file_path = uri;
-				m_configuration.save_settings ();
+				m_configuration.set_last_tree_file_path (uri);
 				chooser.close ();
 			} else {
 				chooser.close ();
@@ -108,9 +105,8 @@ namespace Termites {
 		[GtkCallback]
 		public void save_tree () {
 			// Use path of load to save nodes
-
-			// TESTING PURPOSES
-			FileHelper.save_termites_tree ("termitesTests.ter", termite_tree_store.get_tree ());
+			FileHelper.save_termites_tree (m_configuration.get_last_tree_file_path (),
+			 								termite_tree_store.get_tree ());
 		}
 
 		[GtkCallback]

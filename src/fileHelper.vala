@@ -60,10 +60,14 @@ namespace Termites {
                     } else {
                         linear_file_content.add (line);
                     }
-
                 }
             }
         }
+    }
+
+    public void update_value (string key, string new_value) {
+        file_content.unset (key, null);
+        file_content.set (key, new_value);
     }
 
     public string get_value (string key) {
@@ -78,7 +82,7 @@ namespace Termites {
             file.delete ();
       }
 
-      FileOutputStream file_stream = file.create (FileCreateFlags.REPLACE_DESTINATION);
+      FileOutputStream file_stream = file.create (FileCreateFlags.PRIVATE);
       DataOutputStream stream = new DataOutputStream (file_stream);
 
       stream.put_string (Application.generate_file_header ());
@@ -87,27 +91,37 @@ namespace Termites {
     }
 
     // When saving a file, we can assume that the content is already in its modified state/
-    public void save_file () {
+    public void save () {
         if (linear_file_content.size > 0) {
             save_linear_file ();
         } else {
             save_map_file ();
+            stdout.printf ("Map file \n");
         }
     }
 
     private void save_map_file () {
+        FileOutputStream file_stream = loaded_file.replace (null, true, FileCreateFlags.REPLACE_DESTINATION);
+        DataOutputStream stream = new DataOutputStream (file_stream);
 
+        stream.put_string (Application.generate_file_header ());
+        foreach (var entry in file_content.entries) {
+            stdout.printf (entry.value + "\n");
+            stream.put_string (entry.key + "=" + entry.value);
+            stream.put_string ("\n");
+        }
+        stream.close ();
     }
 
     private void save_linear_file () {
-        FileOutputStream file_stream = loaded_file.create (FileCreateFlags.REPLACE_DESTINATION);
+        FileOutputStream file_stream = loaded_file.replace (null, true, FileCreateFlags.REPLACE_DESTINATION);
         DataOutputStream stream = new DataOutputStream (file_stream);
 
         stream.put_string (Application.generate_file_header ());
         foreach (string line in linear_file_content) {
             stream.put_string (line);
+            stream.put_string ("\n");
         }
-
         stream.close ();
     }
 
