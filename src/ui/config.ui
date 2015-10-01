@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
-  <template class="TermitesConfig" parent="GtkDialog">
+  <template class="TermitesConfigWindow" parent="GtkDialog">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Settings</property>
     <property name="window_position">center</property>

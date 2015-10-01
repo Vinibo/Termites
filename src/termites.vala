@@ -73,7 +73,7 @@ namespace Termites {
 		public void quit_termites (Widget window)
 		{
 			//Verify if save_on_close setting is active
-			if (m_configuration.is_save_on_close ()) {
+			if (m_configuration.get_save_on_close ()) {
 				save_tree ();
 			}
 			Gtk.main_quit();
@@ -233,8 +233,6 @@ namespace Termites {
 
 		[GtkCallback]
 		public void reorganise_tabs () {
-
-			// Display the "greeting" tab
 			if (terminalTabs.get_n_pages () == 0) {
 				terminalTabs.append_page (lblSession);
 				terminalTabs.set_show_tabs (false);
@@ -246,9 +244,10 @@ namespace Termites {
 
 		[GtkCallback]
 		public void open_settings () {
-			m_configuration.set_transient_for (this);
-			m_configuration.show_all ();
-			//m_configuration.run (); // This seems to block parent UI (grayed-out)
+			ConfigWindow cw = new ConfigWindow (m_configuration);
+			cw.set_transient_for (this);
+			cw.show_all ();
+			//cw.run (); // This seems to block parent UI (grayed-out)
 		}
 
 		private static TermiteNode get_selection (TreeModel p_model, TreeIter p_iter) {

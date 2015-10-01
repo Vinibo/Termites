@@ -81,9 +81,11 @@ namespace Termites {
 
                 TermiteNode node = (TermiteNode) node_from_tree;
                 string iter_string = model.get_string_from_iter (iter);
-                stdout.printf ("Position of node %s in tree : %s\n", iter_string, node.serialize ());
-
-                file.put_string (iter_string + "," + node.serialize () + "\n");
+                try {
+                    file.put_string (iter_string + "," + node.serialize () + "\n");
+                } catch (IOError e) {
+                    stderr.printf ("Unable to write node line in file");
+                }
 
                 return false;
             };

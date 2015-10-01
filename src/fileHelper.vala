@@ -28,6 +28,8 @@ using GLib;
 using Gtk;
 using Gee;
 
+// This class should be splitted into two parts
+
 namespace Termites {
 
   public class FileHelper : Object {
@@ -47,21 +49,27 @@ namespace Termites {
     }
 
     private void load_file () {
-        DataInputStream dis = new DataInputStream (loaded_file.read ());
+        try {
+            DataInputStream dis = new DataInputStream (loaded_file.read ());
 
-        if (is_acceptable_file (dis)) {
-            string line;
-            while ((line = dis.read_line (null)) != null) {
-                if (!is_comment (line)) {
-                    string[] splitted_config_line = line.split ("=");
+            if (is_acceptable_file (dis)) {
+                string line;
+                while ((line = dis.read_line (null)) != null) {
+                    if (!is_comment (line)) {
+                        string[] splitted_config_line = line.split ("=");
 
-                    if (splitted_config_line.length > 1) {
-                        file_content.set (splitted_config_line[0], splitted_config_line[1]);
-                    } else {
-                        linear_file_content.add (line);
+                        if (splitted_config_line.length > 1) {
+                            file_content.set (splitted_config_line[0], splitted_config_line[1]);
+                        } else {
+                            linear_file_content.add (line);
+                        }
                     }
                 }
             }
+        } catch (Error e) {
+            stderr.printf ("Unable to open file");
+        } catch (IOError ioe) {
+            stderr.printf ("Unable to read line");
         }
     }
 
@@ -79,7 +87,11 @@ namespace Termites {
       File file = File.new_for_uri (file_path);
 
       if (file.query_exists ()) {
-            file.delete ();
+          try {
+              file.delete ();
+          } catch (Error e) {
+              stderr.printf ("Unable to delete file. Permissions might be missing");
+          }
       }
 
       FileOutputStream file_stream = file.create (FileCreateFlags.PRIVATE);
@@ -96,7 +108,6 @@ namespace Termites {
             save_linear_file ();
         } else {
             save_map_file ();
-            stdout.printf ("Map file \n");
         }
     }
 
@@ -129,14 +140,20 @@ namespace Termites {
     // file has a valid header
     public static bool is_acceptable_file (DataInputStream file_reader) {
         string line_in_file;
-        line_in_file = file_reader.read_line (null);
+
+        try {
+            line_in_file = file_reader.read_line (null);
+        } catch (IOError e) {
+            stderr.printf ("Error while reading first line of file");
+            line_in_file = "";
+        }
 
         string[] application_line = line_in_file.split (":");
 
         bool application_okay = application_line[0] == Application.APPLICATION_NAME;
         bool version_okay = Application.is_compatible_version (application_line[1]);
 
-        stdout.printf ("Application Okay? : %s \nVersion Okay? : %s \n", application_okay.to_string (), version_okay.to_string ());
+        stdout.printf ("Application Okay? : %s Version Okay? : %s \n", application_okay.to_string (), version_okay.to_string ());
 
         return version_okay && application_okay;
     }
