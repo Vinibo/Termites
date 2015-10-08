@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
-  <template class="TermitesConfig" parent="GtkDialog">
+  <template class="TermitesConfigWindow" parent="GtkDialog">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Settings</property>
     <property name="window_position">center</property>
@@ -23,7 +23,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="termites_settings_cancel_and_close" swapped="no"/>
+                <signal name="clicked" handler="cancel_modifications" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -40,7 +40,7 @@
                 <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="termites_settings_save_and_close" swapped="no"/>
+                <signal name="clicked" handler="save_and_close" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -64,7 +64,7 @@
               <object class="GtkLabel" id="label2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">label</property>
+                <property name="label" translatable="yes">Not yet implemented</property>
               </object>
             </child>
             <child type="tab">
@@ -83,11 +83,52 @@
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
                 <child>
+                  <object class="GtkBox" id="save_on_close_box">
+                    <property name="height_request">45</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">3</property>
+                    <property name="resize_mode">immediate</property>
+                    <child>
+                      <object class="GtkLabel" id="lbl_save_on_close">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="opacity">0.94117647058823528</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Save tree on close</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSwitch" id="save_on_close">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="active">True</property>
+                        <property name="state">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkBox" id="auto_save_box">
                     <property name="height_request">45</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_top">10</property>
+                    <property name="margin_left">3</property>
                     <property name="margin_bottom">5</property>
                     <property name="resize_mode">immediate</property>
                     <child>
@@ -122,13 +163,14 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkFrame" id="automatic_saving_frame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">3</property>
                     <property name="label_xalign">0</property>
                     <property name="shadow_type">none</property>
                     <child>
@@ -232,7 +274,7 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -255,7 +297,7 @@
               <object class="GtkLabel" id="label3">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">label</property>
+                <property name="label" translatable="yes">Not yet implemented</property>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -265,7 +307,7 @@
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">label</property>
+                <property name="label" translatable="yes">Fonts</property>
               </object>
               <packing>
                 <property name="position">2</property>

@@ -29,53 +29,52 @@ using Gtk;
 
 namespace Termites {
 
-  [GtkTemplate (ui = "/termites/ui/config.ui")]
-  public class Config : Dialog {
+  public class Config : Object {
 
-      const string DEFAULT_SETTINGS_PATH = "~/.config/Termites/";
+      const string DEFAULT_SETTINGS_PATH = "file://%s/.config/Termites/%s";
+      const string DEFAULT_SETTINGS_FILE = "default.conf";
 
-      private string last_tree_file_path {get; set;}
-
-      [GtkChild]
-      private Switch automatic_save;
-
-      [GtkChild]
-      private Frame automatic_saving_frame;
-
-      [GtkChild]
-      private RadioButton save_on_modification;
-
-      [GtkChild]
-      private RadioButton save_on_timer;
-
-      [GtkChild]
-      private SpinButton save_interval;
+      private FileHelper configuration_file;
 
       public Config () {
-          load_settings ();
-
-          // Apply settings to form
+          configuration_file = new FileHelper (DEFAULT_SETTINGS_PATH.printf (Environment.get_home_dir (), DEFAULT_SETTINGS_FILE));
       }
 
-      public void load_settings () {
-
-          // Should not contains file logic.
-          File file = File.new_for_path (DEFAULT_SETTINGS_PATH + "default.conf");
-
-          if (file.query_exists ()) {
-              DataInputStream dis = new DataInputStream (file.read ());
-
-              if (FileHelper.is_acceptable_file (dis)) {
-                  stdout.printf("File is loaded\n");
-              }
-          } else {
-              // We must create the directory and file
-
-          }
+      public void save () {
+          configuration_file.save (); // Yuk!
       }
 
-      public void save_settings () {
+      public string get_last_tree_file_path () {
+          return configuration_file.get_value ("last_tree_file_path");
+      }
 
+      public void set_last_tree_file_path (string new_value) {
+          configuration_file.update_value ("last_tree_file_path", new_value);
+          configuration_file.save ();
+      }
+
+      public bool get_save_on_close () {
+          return bool.parse (configuration_file.get_value ("save_on_close"));
+      }
+
+      public void set_save_on_close (bool save_on_close) {
+          configuration_file.update_value ("save_on_close", save_on_close.to_string ());
+      }
+
+      public bool get_automatic_save () {
+          return bool.parse (configuration_file.get_value ("automatic_save"));
+      }
+
+      public void set_automatic_save (bool automatic_save) {
+          configuration_file.update_value ("automatic_save", automatic_save.to_string ());
+      }
+
+      public double get_save_interval () {
+          return double.parse (configuration_file.get_value ("save_interval"));
+      }
+
+      public void set_save_interval (double save_interval) {
+          configuration_file.update_value ("save_interval", save_interval.to_string ());
       }
   }
 }

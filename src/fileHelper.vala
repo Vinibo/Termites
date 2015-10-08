@@ -26,22 +26,75 @@
 
 using GLib;
 using Gtk;
+using Gee;
+
+// This class should be splitted into two parts
 
 namespace Termites {
 
   public class FileHelper : Object {
+    private const string HASH_COMMENT = "#";
+    private const string DOUBLEDASH_COMMENT = "//";
 
-    // This object should only contains utility functions
-    // like checking if file is loadable for the version
-    // This method could take a hash and save it
+    private File loaded_file;
+    public HashMap<string, string> file_content {get;set;}
+    public ArrayList<string> linear_file_content {get;set;}
+
+    public FileHelper (string file_path) {
+        loaded_file = File.new_for_uri (file_path);
+        file_content = new HashMap<string, string> ();
+        linear_file_content = new ArrayList<string> ();
+
+        load_file ();
+    }
+
+    private void load_file () {
+        try {
+            DataInputStream dis = new DataInputStream (loaded_file.read ());
+
+            if (is_acceptable_file (dis)) {
+                string line;
+                while ((line = dis.read_line (null)) != null) {
+                    if (!is_comment (line)) {
+                        string[] splitted_config_line = line.split ("=");
+
+                        if (splitted_config_line.length > 1) {
+                            file_content.set (splitted_config_line[0], splitted_config_line[1]);
+                        } else {
+                            linear_file_content.add (line);
+                        }
+                    }
+                }
+            }
+        } catch (Error e) {
+            stderr.printf ("Unable to open file");
+        } catch (IOError ioe) {
+            stderr.printf ("Unable to read line");
+        }
+    }
+
+    public void update_value (string key, string new_value) {
+        file_content.unset (key, null);
+        file_content.set (key, new_value);
+    }
+
+    public string get_value (string key) {
+        return file_content.get(key);
+    }
+
+    //This should be moved to termiteStore
     public static void save_termites_tree (string file_path, TreeStore termites) {
       File file = File.new_for_uri (file_path);
 
       if (file.query_exists ()) {
-            file.delete ();
+          try {
+              file.delete ();
+          } catch (Error e) {
+              stderr.printf ("Unable to delete file. Permissions might be missing");
+          }
       }
 
-      FileOutputStream file_stream = file.create (FileCreateFlags.REPLACE_DESTINATION);
+      FileOutputStream file_stream = file.create (FileCreateFlags.PRIVATE);
       DataOutputStream stream = new DataOutputStream (file_stream);
 
       stream.put_string (Application.generate_file_header ());
@@ -49,62 +102,69 @@ namespace Termites {
       stream.close ();
     }
 
-    // This method could produce a hash from file
-    public static void load_termites_tree (string file_path, TermiteStore termites) {
-      File file = File.new_for_uri (file_path);
-
-      if (!file.query_exists ()) {
-          //throw new
-      }
-
-      DataInputStream dis = new DataInputStream (file.read ());
-
-      if (is_acceptable_file (dis)) {
-        termites.clear_tree ();
-
-        string line;
-        while ((line = dis.read_line (null)) != null) {
-            string[] node_line = line.split (",");
-
-            // Creation of node from array of string
-            TermiteNode node = new TermiteNode.empty ();
-            node.name = node_line[1];
-            node.host = node_line[2];
-            node.port = node_line[3];
-            node.username = node_line[4];
-
-            TreeIter wasteland;
-            TreeIter? new_position = termites.convert_string_to_new_iter (node_line[0]);
-            termites.add_node (node, new_position, out wasteland);
+    // When saving a file, we can assume that the content is already in its modified state/
+    public void save () {
+        if (linear_file_content.size > 0) {
+            save_linear_file ();
+        } else {
+            save_map_file ();
         }
-      } else {
-          stderr.printf ("File not acceptable for this version");
-          // Throw exception because file is not in a proper format
-      }
     }
 
-    public void load_mremoteng_connections (string p_Filepath) {
-        // Not yet implemented - Not sure if it will....
+    private void save_map_file () {
+        FileOutputStream file_stream = loaded_file.replace (null, true, FileCreateFlags.REPLACE_DESTINATION);
+        DataOutputStream stream = new DataOutputStream (file_stream);
+
+        stream.put_string (Application.generate_file_header ());
+        foreach (var entry in file_content.entries) {
+            stdout.printf (entry.value + "\n");
+            stream.put_string (entry.key + "=" + entry.value);
+            stream.put_string ("\n");
+        }
+        stream.close ();
     }
 
-    public void load_putty_profile () {
-        // What? No!
+    private void save_linear_file () {
+        FileOutputStream file_stream = loaded_file.replace (null, true, FileCreateFlags.REPLACE_DESTINATION);
+        DataOutputStream stream = new DataOutputStream (file_stream);
+
+        stream.put_string (Application.generate_file_header ());
+        foreach (string line in linear_file_content) {
+            stream.put_string (line);
+            stream.put_string ("\n");
+        }
+        stream.close ();
     }
 
     // This function read the first line of the given file to verify if the
     // file has a valid header
     public static bool is_acceptable_file (DataInputStream file_reader) {
         string line_in_file;
-        line_in_file = file_reader.read_line (null);
+
+        try {
+            line_in_file = file_reader.read_line (null);
+        } catch (IOError e) {
+            stderr.printf ("Error while reading first line of file");
+            line_in_file = "";
+        }
 
         string[] application_line = line_in_file.split (":");
 
         bool application_okay = application_line[0] == Application.APPLICATION_NAME;
         bool version_okay = Application.is_compatible_version (application_line[1]);
 
-        stdout.printf ("Application Okay? : %s \nVersion Okay? : %s \n", application_okay.to_string (), version_okay.to_string ());
+        stdout.printf ("Application Okay? : %s Version Okay? : %s \n", application_okay.to_string (), version_okay.to_string ());
 
         return version_okay && application_okay;
+    }
+
+    private static bool is_comment (string line) {
+        return starts_with (line, DOUBLEDASH_COMMENT) || starts_with (line, HASH_COMMENT);
+    }
+
+    public static bool starts_with (string original_string, string pattern) {
+        string start_of_string = original_string.substring (0, pattern.length);
+        return start_of_string == pattern;
     }
   }
 }

@@ -46,7 +46,6 @@ namespace Termites {
 		private Label lblSession;
 
 		private TermiteStore termite_tree_store;
-
 		private Config m_configuration;
 
 		static int main (string[] args) {
@@ -63,21 +62,20 @@ namespace Termites {
 			m_configuration = new Config ();
 
 			termite_tree_store = new TermiteStore ();
+			termite_tree_store.load_termites_tree_from_file (m_configuration.get_last_tree_file_path ());
 			terminalTreeview.set_model(termite_tree_store.get_tree ());
 
 			CellRendererText cell = new CellRendererText ();
 			terminalTreeview.insert_column_with_attributes (-1, "Name", cell, "text", 0,null);
 		}
 
-	 	[GtkCallback]
-		public void on_destroy (Widget window)
-		{
-			Gtk.main_quit();
-		}
-
 		[GtkCallback]
 		public void quit_termites (Widget window)
 		{
+			//Verify if save_on_close setting is active
+			if (m_configuration.get_save_on_close ()) {
+				save_tree ();
+			}
 			Gtk.main_quit();
 		}
 
@@ -93,7 +91,11 @@ namespace Termites {
 			chooser.show ();
 			if (chooser.run () == ResponseType.ACCEPT) {
 				string uri = chooser.get_uri ();
-				FileHelper.load_termites_tree (uri, termite_tree_store);
+				stdout.printf ("URI: %s\n", uri);
+				termite_tree_store.load_termites_tree_from_file (uri);
+
+				// Update last opened
+				m_configuration.set_last_tree_file_path (uri);
 				chooser.close ();
 			} else {
 				chooser.close ();
@@ -103,9 +105,8 @@ namespace Termites {
 		[GtkCallback]
 		public void save_tree () {
 			// Use path of load to save nodes
-
-			// TESTING PURPOSES
-			FileHelper.save_termites_tree ("termitesTests.ter", termite_tree_store.get_tree ());
+			FileHelper.save_termites_tree (m_configuration.get_last_tree_file_path (),
+			 								termite_tree_store.get_tree ());
 		}
 
 		[GtkCallback]
@@ -232,8 +233,6 @@ namespace Termites {
 
 		[GtkCallback]
 		public void reorganise_tabs () {
-
-			// Display the "greeting" tab
 			if (terminalTabs.get_n_pages () == 0) {
 				terminalTabs.append_page (lblSession);
 				terminalTabs.set_show_tabs (false);
@@ -245,8 +244,10 @@ namespace Termites {
 
 		[GtkCallback]
 		public void open_settings () {
-			m_configuration.set_transient_for (this);
-			m_configuration.show_all ();
+			ConfigWindow cw = new ConfigWindow (m_configuration);
+			cw.set_transient_for (this);
+			cw.show_all ();
+			//cw.run (); // This seems to block parent UI (grayed-out)
 		}
 
 		private static TermiteNode get_selection (TreeModel p_model, TreeIter p_iter) {
