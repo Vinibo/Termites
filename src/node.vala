@@ -39,6 +39,8 @@ namespace Termites {
 		public string port {get; set;}
 		public string username {get; set;}
 		public Protocol protocol {get; set;}
+		public string password {get; set;}
+		public NodeEnvironment environment {get; set;}
 
 		public TermiteNode (int p_id, string p_name, string p_host, string p_port, string p_username, Protocol p_protocol) {
 			this.id = p_id;
@@ -68,7 +70,7 @@ namespace Termites {
 		}
 
 		public string serialize () {
-			return name + "," + host + "," + port + "," + username;
+			return name + "," + host + "," + port + "," + username + "," + environment.to_string ();
 		}
 	}
 }

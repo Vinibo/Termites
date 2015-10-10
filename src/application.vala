@@ -33,8 +33,8 @@ namespace Termites {
 
     public const string APPLICATION_NAME = "termites";
     private const int APPLICATION_MAJOR = 0;
-    private const int APPLICATION_MINOR = 0;
-    private const int APPLICATION_BUILD = 500;
+    private const int APPLICATION_MINOR = 1;
+    private const int APPLICATION_BUILD = 0;
 
     public Application () {
 
@@ -57,9 +57,23 @@ namespace Termites {
         int minor = int.parse (decomposed_version[1]);
         int build = int.parse (decomposed_version[2]);
 
+        bool not_compatible = is_uncompatible_version (major, minor, build);
+
+        if (not_compatible) {
+            return !not_compatible;
+        }
+
         return major <= APPLICATION_MAJOR &&
                 minor <= APPLICATION_MINOR &&
                 build <= APPLICATION_BUILD;
+    }
+
+    private static bool is_uncompatible_version (int major, int minor, int build) {
+        if (major == 0 && minor < 1) {
+            return false;
+        } else {
+            return true;
+        }
     }
   }
 }

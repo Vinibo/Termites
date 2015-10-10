@@ -1,6 +1,6 @@
 /* -*- Mode: vala; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
 /*
- * protocol.vala
+ * environment.vala
  The MIT License (MIT)
 
  Copyright (c) 2015 Vinibo
@@ -28,74 +28,63 @@ using GLib;
 using Gtk;
 
 namespace Termites {
-  public enum Protocol {
+  public enum NodeEnvironment {
     NONE,
-    SSH,
-    TELNET,
-    SERIAL,
-    VNC,
-    RDP;
+    DEVELOPMENT,
+    TEST,
+    STAGING,
+    PRODUCTION;
 
-    public static Protocol[] all() {
-      return {NONE, SSH, TELNET, SERIAL, VNC, RDP };
-    }
-
-    public static Protocol[] all_supported() {
-        return {NONE, SSH};
+    public static NodeEnvironment[] all() {
+      return {NONE, DEVELOPMENT, TEST, STAGING, PRODUCTION};
     }
 
 	public string to_string () {
 		switch (this) {
             case NONE:
-                return "Other";
-			case SSH:
-				return "SSH";
-			case TELNET:
-				return "Telnet";
-			case SERIAL:
-				return "Serial";
-			case VNC:
-				return "VNC";
-			case RDP:
-				return "RDP";
+                return "Not specified";
+			case DEVELOPMENT:
+				return "Development";
+			case TEST:
+				return "Test";
+			case STAGING:
+				return "Staging";
+			case PRODUCTION:
+				return "Production";
 			default:
 				assert_not_reached();
 		}
 	}
 
-    public int default_port () {
-		switch (this) {
+    public string get_color () {
+        switch (this) {
             case NONE:
-                return 0;
-			case SSH:
-				return 22;
-			case TELNET:
-				return 23;
-			case SERIAL:
-				return 1;
-			case VNC:
-				return 5500;
-			case RDP:
-				return 3389;
-			default:
-				assert_not_reached();
-		}
-	}
+                return "none";
+            case DEVELOPMENT:
+                return "green";
+            case TEST:
+                return "yellow";
+            case STAGING:
+                return "yellow";
+            case PRODUCTION:
+                return "red";
+            default:
+                assert_not_reached();
+        }
+    }
 
-	public static Protocol get( int p_proto) {
+	public static NodeEnvironment get( int p_proto) {
 		switch (p_proto) {
             case 1:
                 return NONE;
 			case 2:
-				return SSH;
+				return DEVELOPMENT;
 			case 3:
-				return TELNET;
+				return TEST;
 			case 4:
-				return SERIAL;
+				return STAGING;
 			case 5:
-				return VNC;
-			case 6:
-				return RDP;
+				return PRODUCTION;
 			default:
 				assert_not_reached();
 		}

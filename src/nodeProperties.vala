@@ -46,7 +46,13 @@ namespace Termites {
 		private Entry txtUsername = new Entry ();
 
 		[GtkChild]
+		private Entry txtPassword = new Entry ();
+
+		[GtkChild]
 		private ComboBox cbProtocol;
+
+		[GtkChild]
+		private ComboBox cbEnvironment;
 
 		private TermiteNode node = null;
 		private TermiteStore m_tree_view = null;
@@ -56,7 +62,7 @@ namespace Termites {
 			TreeModel model;
 			Value node_from_tree;
 
-			init_protocols ();
+			init_controls ();
 			m_tree_view = termites;
 
 			// Extract and load data from selected node
@@ -65,17 +71,12 @@ namespace Termites {
 			model.get_value (node_emplacement, 1, out node_from_tree);
 			node = (TermiteNode) node_from_tree;
 
-			// Load filled form
-			txtNodeName.set_text (node.name);
-			txtHostname.set_text (node.host);
-			txtPort.set_text (node.port);
-			txtUsername.set_text (node.username);
-			cbProtocol.set_active (node.protocol);
+			set_form_from_node (node);
 		}
 
 		public NodeProperties.new (ref TermiteStore termites)
 		{
-			init_protocols ();
+			init_controls ();
 			m_tree_view = termites;
 		}
 
@@ -85,33 +86,22 @@ namespace Termites {
 			this.show_all ();
 		}
 
-    [GtkCallback]
-    public void cancel () {
-      this.destroy ();
-    }
+	    [GtkCallback]
+	    public void cancel () {
+	      this.destroy ();
+	    }
 
 		[GtkCallback]
 		public void save_node () {
-
-			// Two cases here :
-			// 1. It's a new Node
-			// 2. It's an already saved node
-
-			// Verify if all fields are complete
 			if (validate_form ())
 			{
 				TreeIter wasteland;
 
-				if (node_emplacement == null) {
-					node = new TermiteNode.empty();
-				}
+				//if (node_emplacement == null) {
+				//	node = new TermiteNode.empty();
+				//}
 
-				node.name = txtNodeName.get_text ();
-				node.host = txtHostname.get_text ();
-				node.port = txtPort.get_text ();
-				node.username = txtUsername.get_text ();
-				node.protocol = Protocol.get (cbProtocol.get_active ()+1); // Enum index start at 0, Cbbox at 0
-
+				node = get_node_from_form ();
 
 				// Save node
 				if (node_emplacement == null) {
@@ -120,26 +110,86 @@ namespace Termites {
 					m_tree_view.update_node (node, node_emplacement);
 				}
 
-				// Close the form
 				this.close ();
 			}
+		}
+
+		private void init_controls () {
+			init_environment ();
+			init_protocols ();
 		}
 
 		private void init_protocols ()
 		{
 			Gtk.ListStore protoStore = new Gtk.ListStore(1, typeof (string));
-			foreach (Protocol ptl in Protocol.all()) {
+			foreach (Protocol ptl in Protocol.all_supported ()) {
 				TreeIter iter;
 				protoStore.append (out iter);
-				protoStore.set (iter, 0, ptl.to_string());
+				protoStore.set (iter, 0, ptl.to_string ());
 			}
 
-			// Initialize protocol Combobox
 			cbProtocol.set_model (protoStore);
 			CellRendererText cell = new CellRendererText ();
 			cbProtocol.pack_start (cell, false);
 			cbProtocol.set_attributes (cell, "text", 0);
 			cbProtocol.set_active (Protocol.SSH);
+		}
+
+		private void init_environment ()
+		{
+			Gtk.ListStore envStore = new Gtk.ListStore(1, typeof (string));
+			foreach (NodeEnvironment env in NodeEnvironment.all ()) {
+				TreeIter iter;
+				envStore.append (out iter);
+				envStore.set (iter, 0, env.to_string ());
+			}
+
+			cbEnvironment.set_model (envStore);
+			CellRendererText cell = new CellRendererText ();
+			cbEnvironment.pack_start (cell, false);
+			cbEnvironment.set_attributes (cell, "text", 0);
+			cbEnvironment.set_active (NodeEnvironment.NONE);
+		}
+
+		[GtkCallback]
+		private void changed_environment () {
+			NodeEnvironment property = NodeEnvironment.get (cbEnvironment.get_active ()+1);
+			if (property == NodeEnvironment.PRODUCTION) {
+				// We don't allow Prod passwords to be stored yet!
+				txtPassword.set_sensitive (false);
+			} else {
+				txtPassword.set_sensitive (true);
+			}
+		}
+
+		[GtkCallback]
+		private void changed_protocol () {
+			Protocol property = Protocol.get (cbProtocol.get_active ()+1);
+			txtPort.set_text (property.default_port ().to_string());
+		}
+
+		private void set_form_from_node (TermiteNode node) {
+			assert (node != null);
+			txtNodeName.set_text (node.name);
+			txtHostname.set_text (node.host);
+			txtPort.set_text (node.port);
+			txtUsername.set_text (node.username);
+			txtPassword.set_text (node.password);
+			cbProtocol.set_active (node.protocol);
+			cbEnvironment.set_active (node.environment);
+		}
+
+		private TermiteNode get_node_from_form () {
+			TermiteNode node = new TermiteNode.empty ();
+			node.name = txtNodeName.get_text ();
+			node.host = txtHostname.get_text ();
+			node.port = txtPort.get_text ();
+			node.username = txtUsername.get_text ();
+			node.password = txtPassword.get_text ();
+			node.protocol = Protocol.get (cbProtocol.get_active ()+1);
+			node.environment = NodeEnvironment.get (cbEnvironment.get_active ()+1);
+
+			return node;
 		}
 
 		private bool validate_form ()
