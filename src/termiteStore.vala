@@ -58,6 +58,10 @@ namespace Termites {
 
         }
 
+        public void clear_tree () {
+            termiteNodes.clear ();
+        }
+
         public TreeStore get_tree () {
             return termiteNodes;
         }

@@ -56,23 +56,15 @@ namespace Termites {
         int major = int.parse (decomposed_version[0]);
         int minor = int.parse (decomposed_version[1]);
         int build = int.parse (decomposed_version[2]);
-
-        bool not_compatible = is_uncompatible_version (major, minor, build);
-
-        if (not_compatible) {
-            return !not_compatible;
-        }
-
-        return major <= APPLICATION_MAJOR &&
-                minor <= APPLICATION_MINOR &&
-                build <= APPLICATION_BUILD;
+        
+        return !is_uncompatible_version (major, minor, build);
     }
 
     private static bool is_uncompatible_version (int major, int minor, int build) {
         if (major == 0 && minor < 1) {
-            return false;
-        } else {
             return true;
+        } else {
+            return false;
         }
     }
   }

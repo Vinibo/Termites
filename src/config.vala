@@ -41,7 +41,7 @@ namespace Termites {
       }
 
       public void save () {
-          configuration_file.save (); // Yuk!
+          configuration_file.save ();
       }
 
       public string get_last_tree_file_path () {

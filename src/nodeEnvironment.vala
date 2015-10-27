@@ -26,6 +26,7 @@
 
 using GLib;
 using Gtk;
+using Gdk;
 
 namespace Termites {
   public enum NodeEnvironment {
@@ -56,24 +57,50 @@ namespace Termites {
 		}
 	}
 
-    public string get_color () {
+    // Those colors are ugly and hide some details in labels
+    public RGBA get_color () {
+        RGBA color = Gdk.RGBA ();
         switch (this) {
             case NONE:
-                return "none";
+                color.parse ("white");
+                break;
             case DEVELOPMENT:
-                return "green";
+                color.parse ("green");
+                break;
             case TEST:
-                return "yellow";
+                color.parse ("blue");
+                break;
             case STAGING:
-                return "yellow";
+                color.parse ("blue");
+                break;
             case PRODUCTION:
-                return "red";
+                color.parse ("red");
+                break;
             default:
                 assert_not_reached();
+                break;
         }
+        return color;
     }
 
-	public static NodeEnvironment get( int p_proto) {
+    public int get_id () {
+        switch (this) {
+            case NONE:
+                return 1;
+			case DEVELOPMENT:
+				return 2;
+			case TEST:
+				return 3;
+			case STAGING:
+				return 4;
+			case PRODUCTION:
+				return 5;
+			default:
+				assert_not_reached();
+		}
+    }
+
+	public static NodeEnvironment get (int p_proto) {
 		switch (p_proto) {
             case 1:
                 return NONE;

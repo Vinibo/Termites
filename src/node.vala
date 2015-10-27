@@ -30,10 +30,6 @@ using Gtk;
 namespace Termites {
 
 	public class TermiteNode : Object {
-		// Attributes :
-
-		// Id is not required and is a PITA to handle (uniticity of ID, which ID when logical node...)
-		public int id {get; set;}
 		public string name {get; set;}
 		public string host {get; set;}
 		public string port {get; set;}
@@ -42,8 +38,7 @@ namespace Termites {
 		public string password {get; set;}
 		public NodeEnvironment environment {get; set;}
 
-		public TermiteNode (int p_id, string p_name, string p_host, string p_port, string p_username, Protocol p_protocol) {
-			this.id = p_id;
+		public TermiteNode (string p_name, string p_host, string p_port, string p_username, Protocol p_protocol) {
 			this.name = p_name;
 			this.host = p_host;
 			this.port = p_port;
@@ -54,7 +49,6 @@ namespace Termites {
 		public TermiteNode.empty () {}
 
 		public TermiteNode.copy (TermiteNode p_original_instance) {
-			this.id = p_original_instance.id;
 			this.name = p_original_instance.name;
 			this.host = p_original_instance.host;
 			this.port = p_original_instance.port;
@@ -70,7 +64,7 @@ namespace Termites {
 		}
 
 		public string serialize () {
-			return name + "," + host + "," + port + "," + username + "," + environment.to_string ();
+			return name + "," + host + "," + port + "," + username + "," + environment.get_id ().to_string ();
 		}
 	}
 }

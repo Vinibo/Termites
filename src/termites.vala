@@ -57,8 +57,6 @@ namespace Termites {
 		}
 
 		public Termites () {
-
-			// Instantiate configuration
 			m_configuration = new Config ();
 
 			termite_tree_store = new TermiteStore ();
@@ -66,13 +64,12 @@ namespace Termites {
 			terminalTreeview.set_model(termite_tree_store.get_tree ());
 
 			CellRendererText cell = new CellRendererText ();
+			//cell.background_rgba = NodeEnvironment.TEST.get_color ();
 			terminalTreeview.insert_column_with_attributes (-1, "Name", cell, "text", 0,null);
 		}
 
 		[GtkCallback]
-		public void quit_termites (Widget window)
-		{
-			//Verify if save_on_close setting is active
+		public void quit_termites (Widget window) {
 			if (m_configuration.get_save_on_close ()) {
 				save_tree ();
 			}
@@ -91,7 +88,6 @@ namespace Termites {
 			chooser.show ();
 			if (chooser.run () == ResponseType.ACCEPT) {
 				string uri = chooser.get_uri ();
-				stdout.printf ("URI: %s\n", uri);
 				termite_tree_store.load_termites_tree_from_file (uri);
 
 				// Update last opened
@@ -103,8 +99,13 @@ namespace Termites {
 		}
 
 		[GtkCallback]
+		public void new_tree () {
+			m_configuration.set_last_tree_file_path ("");
+			termite_tree_store.clear_tree ();
+		}
+
+		[GtkCallback]
 		public void save_tree () {
-			// Use path of load to save nodes
 			FileHelper.save_termites_tree (m_configuration.get_last_tree_file_path (),
 			 								termite_tree_store.get_tree ());
 		}
@@ -122,10 +123,9 @@ namespace Termites {
 			if (chooser.run () == ResponseType.ACCEPT) {
 				string uri = chooser.get_uri ();
 				FileHelper.save_termites_tree (uri, termite_tree_store.get_tree ());
-				chooser.close ();
-			} else {
-				chooser.close ();
+				m_configuration.set_last_tree_file_path (uri);
 			}
+			chooser.close ();
 		}
 
 		[GtkCallback]
@@ -140,25 +140,20 @@ namespace Termites {
 				window.set_transient_for (this);
 				window.show_all ();
 			}
-			catch (Error e)
-			{
+			catch (Error e) {
 				stderr.printf ("Could not load UI: %s\n", e.message);
 			}
 		}
 
 		[GtkCallback]
 		public void create_node () {
-
 			NodeProperties nodeProp = new NodeProperties.new (ref termite_tree_store);
 			nodeProp.show_window (this);
 		}
 
 		[GtkCallback]
 		public void modify_node () {
-			// Get selected node TreeIter
 			TreeSelection selected_node = terminalTreeview.get_selection ();
-
-			// Send it to the form to read and modify it
 			NodeProperties nodeProp = new NodeProperties.edit (ref termite_tree_store, selected_node);
 			nodeProp.show_window (this);
 		}
@@ -194,41 +189,14 @@ namespace Termites {
 				if (node.host == null) {
 					return;
 				}
-
-				stdout.printf (node.serialize () + "\n");
 			}
 
-			string?[] env_var = {"PROMPT_COMMAND="+Environment.get_variable ("PROMPT_COMMAND")};
-			string?[] interpreter = {SSH_BINARY_PATH,node.get_connection_string ()};
+		    TermitesTerminal test_term = new TermitesTerminal (node);
+            Terminal terminal = test_term.connect ();
 
-			string dir = GLib.Environment.get_current_dir ();
-			Terminal testTerm = new Terminal();
-			testTerm.set_visible (true);
-
-			try {
-				Pty termPty = new Pty.sync (PtyFlags.DEFAULT);
-				testTerm.set_pty (termPty);
-
-				// Close the tab if terminal exit
-				// Could add an error if exits too quickly (oftenly means port is closed)
-				testTerm.child_exited.connect ( (t)=> { terminalTabs.remove (testTerm);} );
-
-				// Spawn a shell into the terminal
-				testTerm.spawn_sync (Vte.PtyFlags.DEFAULT, dir, interpreter,env_var,
-									SpawnFlags.DO_NOT_REAP_CHILD, null, null, null );
-
-				// Get Node name as tab label
-				int tab_number = terminalTabs.append_page (testTerm,create_notebook_child_label (node.name, testTerm));
-
-				terminalTabs.set_tab_reorderable (testTerm, true);
-				reorganise_tabs ();
-
-				// Set focus on new tab
-				terminalTabs.set_current_page (tab_number);
-				testTerm.has_focus =  true;
-			} catch (Error e) {
-				stderr.printf ("Error happened: %s\n", e.message);
-			}
+            int tab_number = terminalTabs.append_page (terminal,create_notebook_child_label (node.name, terminal));
+			terminalTabs.set_tab_reorderable (terminal, true);
+			reorganise_tabs ();
 		}
 
 		[GtkCallback]
@@ -247,7 +215,6 @@ namespace Termites {
 			ConfigWindow cw = new ConfigWindow (m_configuration);
 			cw.set_transient_for (this);
 			cw.show_all ();
-			//cw.run (); // This seems to block parent UI (grayed-out)
 		}
 
 		private static TermiteNode get_selection (TreeModel p_model, TreeIter p_iter) {
@@ -257,9 +224,7 @@ namespace Termites {
 			return node;
 		}
 
-		private Widget create_notebook_child_label (string p_text, Widget p_term_tab)
-		{
-
+		private Widget create_notebook_child_label (string p_text, Widget p_term_tab) {
 		    Label label = new Label(p_text);
 		    var image = new Image.from_icon_name(Stock.CLOSE, IconSize.MENU);
 
@@ -270,8 +235,8 @@ namespace Termites {
 		    button.set_focus_on_click(false);
 		    button.add(image);
 
-				// Link action to signal
-				button.clicked.connect ( (t)=> {terminalTabs.remove (p_term_tab); });
+			// Link action to signal
+			button.clicked.connect ( (t)=> {terminalTabs.remove (p_term_tab); });
 
 		    Box box = new Box(Orientation.HORIZONTAL, 2);
 		    box.pack_start(label, false, false ,0);
