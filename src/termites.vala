@@ -31,7 +31,6 @@ using Vte;
 namespace Termites {
 
 	const string UI_ABOUT = "ui/aboutTermites.ui";
-	const string SSH_BINARY_PATH = "/usr/bin/ssh";
 
 	[GtkTemplate (ui = "/termites/ui/termites.ui")]
 	public class Termites : Gtk.ApplicationWindow {
