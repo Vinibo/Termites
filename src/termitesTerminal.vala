@@ -51,19 +51,10 @@
                  Pty termPty = new Pty.sync (PtyFlags.DEFAULT);
                  terminal.set_pty (termPty);
 
-                 // Could add an error if exits too quickly (oftenly means port is closed)
-                //terminal.child_exited.connect ( (t)=> { stdout.printf ("Tab closed by signal \n");
-                //                                        terminalTabs.remove (terminal);} );
-
-                terminal.child_exited.connect ( (t)=> { stdout.printf ("Tab closed by signal \n");} );
                  // Spawn a shell into the terminal
                  terminal.spawn_sync (Vte.PtyFlags.DEFAULT, dir, interpreter,env_var,
                                      SpawnFlags.DO_NOT_REAP_CHILD, null, null, null );
 
-                // Connect event to catch errors and password prompt
-                terminal.contents_changed.connect ( (t) => {stdout.printf ("New message on console!\n");});
-                //terminal.text_modified.connect ( (t) => {stdout.printf ("New message on console!\n");});
-                stdout.printf ("Some test message\n");
                 // Put in place a error/message detection system to reconize SSH messages as they appear
                 // Or simply wait for next line?
 

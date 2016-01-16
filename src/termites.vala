@@ -197,7 +197,6 @@ namespace Termites {
             terminal.child_exited.connect ( (t)=> { stdout.printf ("Tab closed by signal \n");
                                                     terminalTabs.remove (terminal);} );
 
-
             int tab_number = terminalTabs.append_page (terminal,create_notebook_child_label (node.name, terminal));
 			terminalTabs.set_tab_reorderable (terminal, true);
 			reorganise_tabs ();
