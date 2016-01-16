@@ -192,7 +192,12 @@ namespace Termites {
 			}
 
 		    TermitesTerminal test_term = new TermitesTerminal (node);
-            Terminal terminal = test_term.connect ();
+		    Terminal terminal = new Terminal ();
+            test_term.connect (terminal);
+
+            terminal.child_exited.connect ( (t)=> { stdout.printf ("Tab closed by signal \n");
+                                                    terminalTabs.remove (terminal);} );
+
 
             int tab_number = terminalTabs.append_page (terminal,create_notebook_child_label (node.name, terminal));
 			terminalTabs.set_tab_reorderable (terminal, true);

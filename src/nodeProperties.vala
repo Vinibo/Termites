@@ -153,7 +153,7 @@ namespace Termites {
 
 		[GtkCallback]
 		private void changed_environment () {
-			NodeEnvironment property = NodeEnvironment.get (cbEnvironment.get_active ()+1);
+			NodeEnvironment property = NodeEnvironment.get (cbEnvironment.get_active ());
 			if (property == NodeEnvironment.PRODUCTION) {
 				// We don't allow Prod passwords to be stored yet!
 				txtPassword.set_sensitive (false);
@@ -164,7 +164,7 @@ namespace Termites {
 
 		[GtkCallback]
 		private void changed_protocol () {
-			Protocol property = Protocol.get (cbProtocol.get_active ()+1);
+			Protocol property = Protocol.get (cbProtocol.get_active ());
 			txtPort.set_text (property.default_port ().to_string());
 		}
 
@@ -186,8 +186,8 @@ namespace Termites {
 			node.port = txtPort.get_text ();
 			node.username = txtUsername.get_text ();
 			node.password = txtPassword.get_text ();
-			node.protocol = Protocol.get (cbProtocol.get_active ()+1);
-			node.environment = NodeEnvironment.get (cbEnvironment.get_active ()+1);
+			node.protocol = Protocol.get (cbProtocol.get_active ());
+			node.environment = NodeEnvironment.get (cbEnvironment.get_active ());
 
 			return node;
 		}

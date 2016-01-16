@@ -102,15 +102,15 @@ namespace Termites {
 
 	public static NodeEnvironment get (int p_proto) {
 		switch (p_proto) {
-            case 1:
+            case 0:
                 return NONE;
-			case 2:
+			case 1:
 				return DEVELOPMENT;
-			case 3:
+			case 2:
 				return TEST;
-			case 4:
+			case 3:
 				return STAGING;
-			case 5:
+			case 4:
 				return PRODUCTION;
 			default:
 				assert_not_reached();

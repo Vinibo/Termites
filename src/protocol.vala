@@ -84,17 +84,17 @@ namespace Termites {
 
 	public static Protocol get( int p_proto) {
 		switch (p_proto) {
-            case 1:
+            case 0:
                 return NONE;
-			case 2:
+			case 1:
 				return SSH;
-			case 3:
+			case 2:
 				return TELNET;
-			case 4:
+			case 3:
 				return SERIAL;
-			case 5:
+			case 4:
 				return VNC;
-			case 6:
+			case 5:
 				return RDP;
 			default:
 				assert_not_reached();

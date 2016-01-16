@@ -64,7 +64,9 @@ namespace Termites {
 		}
 
 		public string serialize () {
-			return name + "," + host + "," + port + "," + username + "," + environment.get_id ().to_string ();
+		    int protocol_index = protocol;
+		    int environment_index = environment;
+			return name + "," + host + "," + port + "," + username + "," + protocol_index.to_string () + "," + environment_index.to_string();
 		}
 	}
 }

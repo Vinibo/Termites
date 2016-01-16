@@ -40,13 +40,11 @@
              nodeConnection = node;
          }
 
-         public Terminal connect () {
-
+         public Terminal connect (Terminal terminal) {
             string?[] env_var = {"PROMPT_COMMAND="+Environment.get_variable ("PROMPT_COMMAND")};
 			string?[] interpreter = {SSH_BINARY_PATH,nodeConnection.get_connection_string ()};
 
 			string dir = GLib.Environment.get_current_dir ();
-			Terminal terminal = new Terminal();
 			terminal.set_visible (true);
 
              try {
@@ -55,7 +53,7 @@
 
                  // Could add an error if exits too quickly (oftenly means port is closed)
                 //terminal.child_exited.connect ( (t)=> { stdout.printf ("Tab closed by signal \n");
-                //                                         terminalTabs.remove (terminal);} );
+                //                                        terminalTabs.remove (terminal);} );
 
                  // Spawn a shell into the terminal
                  terminal.spawn_sync (Vte.PtyFlags.DEFAULT, dir, interpreter,env_var,
@@ -64,11 +62,11 @@
                 // Put in place a error/message detection system to reconize SSH messages as they appear
                 // Or simply wait for next line?
 
-                 if (nodeConnection.password != null) {
-                    Posix.sleep (1);
-                    string password_command = nodeConnection.password + "\n";
-                    terminal.feed_child (password_command, password_command.char_count ());
-                 }
+                 //if (nodeConnection.password != null) {
+                 //   Posix.sleep (1);
+                 //   string password_command = nodeConnection.password + "\n";
+                 //   terminal.feed_child (password_command, password_command.char_count ());
+                 //}
                  terminal.has_focus =  true;
              } catch (Error e) {
                  stderr.printf ("Error happened: %s\n", e.message);
