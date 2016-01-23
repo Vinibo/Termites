@@ -1,0 +1,30 @@
+<schemalist>
+  <schema id="net.vinibo.Termites" path="/org/example/my-app/" gettext-domain="my-app">
+
+    <key name="last-tree-file-path" type="s">
+      <default>"unset"</default>
+      <summary>Saved tree file path</summary>
+      <description>
+        Path of the last loaded tree.
+      </description>
+    </key>
+
+    <key name="save-on-close" type="b">
+      <default>true</default>
+      <summary>Save tree on application close</summary>
+      <description>
+        Indiciate if tree must be saved when applicat is being closed.
+        Tree will be saved at the "last_tree_file_path" location.
+      </description>
+    </key>
+
+    <key name="automatic-save" type="b">
+      <default>false</default>
+      <summary>Automatically save terminal tree after a determined rule</summary>
+      <description>
+        When activated, automatic save will save at a given interval or at each modifications.
+      </description>
+    </key>
+    
+  </schema>
+</schemalist>

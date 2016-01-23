@@ -32,31 +32,13 @@ namespace Termites {
   [GtkTemplate (ui = "/termites/ui/config.ui")]
   public class ConfigWindow : Dialog {
 
-      // It was conveniant to merge UI and functions in one class but it's not anymore
-      // We need to split those in 2 objects with maybe heritage
-
-      const string DEFAULT_SETTINGS_PATH = "file://%s/.config/Termites/%s";
-      const string DEFAULT_SETTINGS_FILE = "default.conf";
-
       private Config configuration;
 
       [GtkChild]
       private Switch automatic_save;
 
       [GtkChild]
-      private Frame automatic_saving_frame;
-
-      [GtkChild]
       private Switch save_on_close;
-
-      [GtkChild]
-      private RadioButton save_on_modification;
-
-      [GtkChild]
-      private RadioButton save_on_timer;
-
-      [GtkChild]
-      private SpinButton save_interval;
 
       public ConfigWindow (Config loaded_configuration) {
           configuration = loaded_configuration;
@@ -66,7 +48,6 @@ namespace Termites {
       [GtkCallback]
       private void save_and_close () {
           apply_modifications ();
-          configuration.save ();
           this.close ();
       }
 
@@ -77,14 +58,12 @@ namespace Termites {
 
       private void load_settings_status () {
           automatic_save.set_state (configuration.get_automatic_save ());
-          save_interval.set_value (configuration.get_save_interval ());
           save_on_close.set_state (configuration.get_save_on_close ());
       }
 
       private void apply_modifications () {
           configuration.set_automatic_save (automatic_save.active);
           configuration.set_save_on_close (save_on_close.active);
-          configuration.set_save_interval (save_interval.get_value ());
       }
   }
 }

@@ -31,7 +31,9 @@ namespace Termites {
 
   public class Application : Object {
 
+
     public const string APPLICATION_NAME = "termites";
+    public const string FQ_APPLICATION_NAME = "net.vinibo.Termites";
     private const int APPLICATION_MAJOR = 0;
     private const int APPLICATION_MINOR = 0;
     private const int APPLICATION_BUILD = 500;
