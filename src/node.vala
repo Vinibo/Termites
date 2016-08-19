@@ -38,15 +38,15 @@ namespace Termites {
 		public string host {get; set;}
 		public string port {get; set;}
 		public string username {get; set;}
-		public Protocol protocol {get; set;}
+		public NodeType nodetype {get; set;}
 
-		public TermiteNode (int p_id, string p_name, string p_host, string p_port, string p_username, Protocol p_protocol) {
+		public TermiteNode (int p_id, string p_name, string p_host, string p_port, string p_username, NodeType p_type) {
 			this.id = p_id;
 			this.name = p_name;
 			this.host = p_host;
 			this.port = p_port;
 			this.username = p_username;
-			this.protocol = p_protocol;
+			this.nodetype = p_type;
 		}
 
 		public TermiteNode.empty () {}

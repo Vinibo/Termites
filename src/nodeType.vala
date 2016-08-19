@@ -28,54 +28,73 @@ using GLib;
 using Gtk;
 
 namespace Termites {
-  public enum Protocol {
-    NONE,
-    SSH,
-    TELNET,
-    SERIAL,
-    VNC,
-    RDP;
+	public enum NodeType {
+	FOLDER,
+	SSH,
+	TELNET,
+	SERIAL,
+	VNC,
+	RDP;
 
-    public static Protocol[] all() {
-      return {NONE, SSH, TELNET, SERIAL, VNC, RDP };
-    }
+		public static NodeType[] all() {
+		  return {FOLDER, SSH, TELNET, SERIAL, VNC, RDP };
+		}
 
-	public string to_string () {
-		switch (this) {
-            case NONE:
-                return "Other";
-			case SSH:
-				return "SSH";
-			case TELNET:
-				return "Telnet";
-			case SERIAL:
-				return "Serial";
-			case VNC:
-				return "VNC";
-			case RDP:
-				return "RDP";
-			default:
-				assert_not_reached();
+		public static NodeType get( int p_proto) {
+			switch (p_proto) {
+				case 1:
+				    return FOLDER;
+				case 2:
+					return SSH;
+				case 3:
+					return TELNET;
+				case 4:
+					return SERIAL;
+				case 5:
+					return VNC;
+				case 6:
+					return RDP;
+				default:
+					assert_not_reached();
+			}
+		}
+
+		public string to_string () {
+			switch (this) {
+				case FOLDER:
+				    return "Folder";
+				case SSH:
+					return "SSH";
+				case TELNET:
+					return "Telnet";
+				case SERIAL:
+					return "Serial";
+				case VNC:
+					return "VNC";
+				case RDP:
+					return "RDP";
+				default:
+					assert_not_reached();
+			}
+		}
+
+		public int default_port () {
+			switch (this) {
+				case FOLDER:
+				    return 0;
+				case SSH:
+					return 22;
+				case TELNET:
+					return 23;
+				case SERIAL:
+					return 0;
+				case VNC:
+					return 5900;
+				case RDP:
+					return 3389;
+				default:
+					assert_not_reached();
+			}
 		}
 	}
-
-	public static Protocol get( int p_proto) {
-		switch (p_proto) {
-            case 1:
-                return NONE;
-			case 2:
-				return SSH;
-			case 3:
-				return TELNET;
-			case 4:
-				return SERIAL;
-			case 5:
-				return VNC;
-			case 6:
-				return RDP;
-			default:
-				assert_not_reached();
-		}
-	}
-  }
 }

@@ -46,18 +46,23 @@ namespace Termites {
 		private Entry txtUsername = new Entry ();
 
 		[GtkChild]
-		private ComboBox cbProtocol;
+		private ComboBox cbNodeType;
 
 		private TermiteNode node = null;
 		private TermiteStore m_tree_view = null;
 		private TreeIter? node_emplacement = null;
 
-		public NodeProperties.edit (ref TermiteStore termites, TreeSelection selected_node) {
+		public NodeProperties.new (ref TermiteStore termites)
+		{
+			initialize_form_with_termite_store (ref termites);
+		}
+
+		public NodeProperties.edit (ref TermiteStore termites, TreeSelection selected_node)
+		{
 			TreeModel model;
 			Value node_from_tree;
 
-			init_protocols ();
-			m_tree_view = termites;
+			initialize_form_with_termite_store (ref termites);
 
 			// Extract and load data from selected node
 			selected_node.get_selected (out model, out node_emplacement);
@@ -70,29 +75,130 @@ namespace Termites {
 			txtHostname.set_text (node.host);
 			txtPort.set_text (node.port);
 			txtUsername.set_text (node.username);
-			cbProtocol.set_active (node.protocol);
+			cbNodeType.set_active (node.nodetype);
 		}
 
-		public NodeProperties.new (ref TermiteStore termites)
-		{
-			init_protocols ();
+		public void initialize_form_with_termite_store (ref TermiteStore termites) {
+			init_nodetypes ();
 			m_tree_view = termites;
 		}
 
-		public void show_window (Window p_parent_window)
-		{
+		public void show_window (Window p_parent_window) {
 			this.set_transient_for (p_parent_window);
 			this.show_all ();
 		}
 
-    [GtkCallback]
-    public void cancel () {
-      this.destroy ();
-    }
+		[GtkCallback]
+		public void cancel_callback () {
+		  this.destroy ();
+		}
 
 		[GtkCallback]
-		public void save_node () {
+		public void save_node_callback () {
+			save_node ();
+		}
 
+		[GtkCallback]
+		public void nodetype_changed_callback ()
+		{
+			change_fields_sensitivity_from_nodetype ();
+		}
+
+		private void init_nodetypes ()
+		{
+			Gtk.ListStore protoStore = new Gtk.ListStore(1, typeof (string));
+			foreach (NodeType ptl in NodeType.all()) {
+				TreeIter iter;
+				protoStore.append (out iter);
+				protoStore.set (iter, 0, ptl.to_string());
+			}
+
+			// Initialize protocol Combobox
+			cbNodeType.set_model (protoStore);
+			CellRendererText cell = new CellRendererText ();
+			cbNodeType.pack_start (cell, false);
+			cbNodeType.set_attributes (cell, "text", 0);
+			cbNodeType.set_active (NodeType.SSH);
+		}
+
+		// This method change sensitivity (active or greyed out) on fields
+		// according to the node type selected.
+		private void change_fields_sensitivity_from_nodetype ()
+		{
+			NodeType selected_type = NodeType.get (cbNodeType.get_active ()+1);
+
+			if (selected_type == NodeType.FOLDER) {
+				txtPort.set_text ("");
+				txtUsername.sensitive = false;
+				txtHostname.sensitive = false;
+				txtPort.sensitive = false;
+			} else {
+				txtUsername.sensitive = true;
+				txtHostname.sensitive = true;
+				txtPort.sensitive = true;
+				txtPort.set_text (selected_type.default_port().to_string());
+			}
+		}
+
+		private bool validate_form ()
+		{
+			NodeType type = NodeType.get (cbNodeType.get_active ()+1);
+
+			if (type == NodeType.FOLDER) {
+				return is_valid_folder ();
+			}
+
+			return is_valid_node ();
+		}
+
+		// Validates if a folder respect all the criterias
+		private bool is_valid_folder ()
+		{
+			string node_name = txtNodeName.get_text ();
+			if (node_name == null || node_name.strip().length < 1) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		// Validate data (Not empty, valid IP)
+		// To check if an ip is valid, we may ping the target and
+		// display a validator icon beside ip control to indicate if
+		// the host is replying. (Note that some host may not response to ping requests)
+		private bool is_valid_node ()
+		{
+			if (txtNodeName.get_text() == null || txtHostname.get_text () == null || txtPort.get_text () == null)
+			{
+				return false;
+			}
+
+			// We must validate entered IP and port
+			bool test = is_service_reachable ();
+			stdout.printf ("recheable : %s\n", test.to_string ());
+
+			return true;
+		}
+
+		// Incomplete method. Should try to ping the host or something else..
+		private bool is_service_reachable ()
+		{
+			bool is_reachable = false;
+			NetworkMonitor monitor = NetworkMonitor.get_default ();
+			NetworkAddress address = new NetworkAddress (txtHostname.get_text (), (uint16) txtPort.get_text ());
+
+			try {
+				// It seems to return false only if an invalid IP is given
+				is_reachable = monitor.can_reach (address);
+			} catch (Error e) {
+
+			}
+
+		  	return is_reachable;
+		}
+
+		private void save_node ()
+		{
 			// Two cases here :
 			// 1. It's a new Node
 			// 2. It's an already saved node
@@ -110,7 +216,7 @@ namespace Termites {
 				node.host = txtHostname.get_text ();
 				node.port = txtPort.get_text ();
 				node.username = txtUsername.get_text ();
-				node.protocol = Protocol.get (cbProtocol.get_active ()+1); // Enum index start at 0, Cbbox at 0
+				node.nodetype = NodeType.get (cbNodeType.get_active ()+1); // Enum index start at 0, Cbbox at 0
 
 
 				// Save node
@@ -124,57 +230,5 @@ namespace Termites {
 				this.close ();
 			}
 		}
-
-		private void init_protocols ()
-		{
-			Gtk.ListStore protoStore = new Gtk.ListStore(1, typeof (string));
-			foreach (Protocol ptl in Protocol.all()) {
-				TreeIter iter;
-				protoStore.append (out iter);
-				protoStore.set (iter, 0, ptl.to_string());
-			}
-
-			// Initialize protocol Combobox
-			cbProtocol.set_model (protoStore);
-			CellRendererText cell = new CellRendererText ();
-			cbProtocol.pack_start (cell, false);
-			cbProtocol.set_attributes (cell, "text", 0);
-			cbProtocol.set_active (Protocol.SSH);
-		}
-
-		private bool validate_form ()
-		{
-			// Validate data (Not empty, valid IP)
-			// To check if an ip is valid, we may ping the target and
-			// display a validator icon beside ip control to indicate if
-			// the host is replying. (Note that some host may not response to ping requests)
-
-			if (txtNodeName.get_text() == null || txtHostname.get_text () == null || txtPort.get_text () == null)
-			{
-				return false;
-			}
-			else
-			{
-				// We must validate entered IP and port
-				bool test = is_service_reachable ();
-				stdout.printf ("recheable : %s\n", test.to_string ());
-
-				return true;
-			}
-		}
-
-	    private bool is_service_reachable () {
-			bool is_reachable = false;
-			NetworkMonitor monitor = NetworkMonitor.get_default ();
-			NetworkAddress address = new NetworkAddress (txtHostname.get_text (), (uint16) txtPort.get_text ());
-
-			try {
-				is_reachable = monitor.can_reach (address);
-			} catch (Error e) {
-
-			}
-
-		  	return is_reachable;
-	    }
 	}
 }
