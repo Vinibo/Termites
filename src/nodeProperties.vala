@@ -78,23 +78,27 @@ namespace Termites {
 			cbNodeType.set_active (node.nodetype);
 		}
 
-		public void initialize_form_with_termite_store (ref TermiteStore termites) {
+		public void initialize_form_with_termite_store (ref TermiteStore termites)
+		{
 			init_nodetypes ();
 			m_tree_view = termites;
 		}
 
-		public void show_window (Window p_parent_window) {
+		public void show_window (Window p_parent_window)
+		{
 			this.set_transient_for (p_parent_window);
 			this.show_all ();
 		}
 
 		[GtkCallback]
-		public void cancel_callback () {
+		public void cancel_callback ()
+		{
 		  this.destroy ();
 		}
 
 		[GtkCallback]
-		public void save_node_callback () {
+		public void save_node_callback ()
+		{
 			save_node ();
 		}
 
