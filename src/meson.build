@@ -9,9 +9,7 @@ sources = [
 	'config.vala',
 	'configWindow.vala',
 	'termites.vala',
-	'fileHelper.vala'
-	#,'resources.c'
-	]
+	'fileHelper.vala']
 
 gnome = import('gnome')
 
@@ -22,13 +20,13 @@ glib = dependency('glib-2.0', version: '>=2.38')
 gobject = dependency('gobject-2.0')
 gtk = dependency('gtk+-3.0')
 
-gnome.compile_resources(
-	'as-resources', 'uiRes.xml',
-	source_dir : '.',
-	c_name : 'resources')
+resource_file = gnome.compile_resources(
+		'resources', 'uiRes.xml',
+		source_dir : '.',
+		c_name : 'resources')
 
 #gnome.compile_schemas()
 
-executable('Termites', sources,
+executable('Termites', [sources,resource_file],
 	dependencies : [gtk, vte, gee, gio, glib, gobject],
-	vala_args: ['--target-glib=2.38'])
+	vala_args: ['--gresources=../uiRes.xml'])

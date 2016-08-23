@@ -32,6 +32,7 @@ namespace Termites {
 
 	const string UI_ABOUT = "ui/aboutTermites.ui";
 	const string SSH_BINARY_PATH = "/usr/bin/ssh";
+	const string TELNET_BINARY_PATH = "/usr/bin/telnet";
 
 	[GtkTemplate (ui = "/termites/ui/termites.ui")]
 	public class Termites : Gtk.ApplicationWindow {
@@ -187,25 +188,19 @@ namespace Termites {
 		[GtkCallback]
 		public void open_connection(TreeView p_view, TreePath p_root, TreeViewColumn p_column) {
 
-			TreeIter iter;
-			TermiteNode node = null;
-			if (p_view.model.get_iter (out iter,p_root)) {
-				node = get_selection (p_view.model, iter);
-				if (node.host == null) {
-					return;
-				}
-
-				stdout.printf (node.serialize () + "\n");
-			}
+			TermiteNode node = get_selection_from_path (p_view, p_root);
 
 			string?[] env_var = {"PROMPT_COMMAND="+Environment.get_variable ("PROMPT_COMMAND")};
-			string?[] interpreter = {SSH_BINARY_PATH,node.get_connection_string ()};
 
-			string dir = GLib.Environment.get_current_dir ();
+			// Interpreter might be a reusable concept. It is with all the "terminal" connections
+			string?[] interpreter = {SSH_BINARY_PATH,node.get_connection_string ()};
+			string dir = GLib.Environment.get_current_dir (); // This doesn't change in the program's execution
+
 			Terminal testTerm = new Terminal();
 			testTerm.set_visible (true);
 
 			try {
+				// Pty is only useful for "terminal" connections
 				Pty termPty = new Pty.sync (PtyFlags.DEFAULT);
 				testTerm.set_pty (termPty);
 
@@ -237,8 +232,8 @@ namespace Termites {
 				terminalTabs.append_page (lblSession);
 				terminalTabs.set_show_tabs (false);
 			} else if (terminalTabs.page_num (lblSession) > -1) {
-					terminalTabs.remove(lblSession);
-					terminalTabs.set_show_tabs (true);
+				terminalTabs.remove(lblSession);
+				terminalTabs.set_show_tabs (true);
 			}
 		}
 
@@ -250,7 +245,18 @@ namespace Termites {
 			//cw.run (); // This seems to block parent UI (grayed-out)
 		}
 
-		private static TermiteNode get_selection (TreeModel p_model, TreeIter p_iter) {
+		private static TermiteNode get_selection_from_path (TreeView p_view, TreePath p_root) {
+			TreeIter iter;
+			TermiteNode node = null;
+
+			if (p_view.model.get_iter (out iter,p_root)) {
+				node = get_selection_from_iter (p_view.model, iter);
+			}
+
+			return node;
+		}
+
+		private static TermiteNode get_selection_from_iter (TreeModel p_model, TreeIter p_iter) {
 			Value node_from_tree;
 			p_model.get_value (p_iter, 1, out node_from_tree);
 			TermiteNode node = (TermiteNode) node_from_tree;

@@ -96,5 +96,25 @@ namespace Termites {
 					assert_not_reached();
 			}
 		}
+
+		// Maybe this method should return a "pattern" instead...
+		public string connection_string (TermiteNode p_node) {
+			switch (this) {
+				case FOLDER:
+				    return "";
+				case SSH:
+					return p_node.username + "@" + p_node.host;
+				case TELNET:
+					return p_node.host + " " + p_node.port;
+				case SERIAL:
+					return "Not implemented yet";
+				case VNC:
+					return "Not implemented yet";
+				case RDP:
+					return "Not implemented yet";
+				default:
+					assert_not_reached();
+			}
+		}
 	}
 }

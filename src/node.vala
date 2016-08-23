@@ -64,7 +64,7 @@ namespace Termites {
 		}
 
 		public string get_connection_string () {
-			return username + "@" + host;
+			return nodetype.connection_string (this);
 		}
 
 		public string serialize () {
