@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Termites
+Comment=An organised terminal emulator
+Exec=Termites
+Icon=NotYet
+Terminal=false
+Categories=GTK;GNOME;Utility
